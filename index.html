@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ArenaFlow AI — GameClock-aware crowd intelligence for large-scale sporting venues." />
+  <meta name="theme-color" content="#1a1a2e" />
+
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://maps.googleapis.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com https://maps.googleapis.com; img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com; font-src https://fonts.gstatic.com;" />
+
+  <title>ArenaFlow AI — GameClock Intelligence</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Skip Navigation for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- App Shell -->
+  <div id="app" role="application" aria-label="ArenaFlow AI">
+
+    <!-- Header -->
+    <header class="app-header" role="banner">
+      <div class="header-inner">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">🏟️</span>
+          <span class="brand-name">ArenaFlow <span class="brand-accent">AI</span></span>
+        </div>
+
+        <!-- Game Clock Display -->
+        <div class="game-clock-widget" aria-label="Game Status" role="status" aria-live="polite">
+          <div class="game-score" id="game-score-display">Q2 · 08:42 · 64–58</div>
+          <div class="surge-indicator" id="surge-indicator" aria-label="Crowd surge prediction">
+            <span class="surge-dot" id="surge-dot"></span>
+            <span id="surge-label">Low Surge Risk</span>
+          </div>
+        </div>
+
+        <!-- Accessibility & Settings Controls -->
+        <div class="header-controls">
+          <button
+            id="high-contrast-btn"
+            class="icon-btn"
+            aria-label="Toggle high contrast mode"
+            aria-pressed="false"
+            title="High contrast mode"
+          >
+            <span class="material-icons-round" aria-hidden="true">contrast</span>
+          </button>
+          <button
+            id="accessibility-mode-btn"
+            class="icon-btn"
+            aria-label="Toggle accessibility routing mode"
+            aria-pressed="false"
+            title="Accessibility routing"
+          >
+            <span class="material-icons-round" aria-hidden="true">accessible</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+
+      <!-- Navigation Tabs -->
+      <nav class="tab-nav" role="tablist" aria-label="App sections">
+        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-dashboard" id="tab-dashboard" data-tab="dashboard">
+          <span class="material-icons-round" aria-hidden="true">dashboard</span>
+          <span>Dashboard</span>
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-map" id="tab-map" data-tab="map">
+          <span class="material-icons-round" aria-hidden="true">map</span>
+          <span>Venue Map</span>
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-queues" id="tab-queues" data-tab="queues">
+          <span class="material-icons-round" aria-hidden="true">schedule</span>
+          <span>Queues</span>
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-ai" id="tab-ai" data-tab="ai">
+          <span class="material-icons-round" aria-hidden="true">smart_toy</span>
+          <span>AI Chat</span>
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-group" id="tab-group" data-tab="group">
+          <span class="material-icons-round" aria-hidden="true">group</span>
+          <span>Squad</span>
+        </button>
+      </nav>
+
+      <!-- ─────────────────────── DASHBOARD PANEL ─────────────────────── -->
+      <section id="panel-dashboard" class="tab-panel active" role="tabpanel" aria-labelledby="tab-dashboard">
+        <!-- Game State Control -->
+        <div class="card game-state-card">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">sports_basketball</span>
+            <h2>Game State</h2>
+            <span class="badge badge-live" aria-label="Live">LIVE</span>
+          </div>
+          <div class="game-controls">
+            <div class="control-group">
+              <label for="sport-select">Sport</label>
+              <select id="sport-select" aria-label="Select sport type">
+                <option value="basketball">🏀 Basketball</option>
+                <option value="football">🏈 American Football</option>
+                <option value="soccer">⚽ Soccer</option>
+                <option value="hockey">🏒 Ice Hockey</option>
+                <option value="baseball">⚾ Baseball</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="period-select">Period</label>
+              <select id="period-select" aria-label="Select game period">
+                <option value="1">Q1 / 1st</option>
+                <option value="2" selected>Q2 / 2nd</option>
+                <option value="3">Q3 / 3rd</option>
+                <option value="4">Q4 / 4th</option>
+                <option value="ot">Overtime</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="clock-input">Clock (mm:ss)</label>
+              <input type="text" id="clock-input" value="08:42" pattern="\d{1,2}:\d{2}"
+                aria-label="Game clock" placeholder="08:42" maxlength="5" />
+            </div>
+            <div class="control-group">
+              <label for="score-diff">Score Diff</label>
+              <input type="number" id="score-diff" value="6" min="-50" max="50"
+                aria-label="Score differential (home minus away)" />
+            </div>
+            <button id="update-game-btn" class="btn btn-primary" aria-label="Update game state and recalculate predictions">
+              <span class="material-icons-round" aria-hidden="true">refresh</span>
+              Update Predictions
+            </button>
+          </div>
+        </div>
+
+        <!-- Surge Prediction Timeline -->
+        <div class="card" aria-label="Surge prediction timeline">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">timeline</span>
+            <h2>Surge Forecast</h2>
+            <span class="info-tooltip" tabindex="0" aria-label="Predicted crowd movement surges based on game clock position">ℹ</span>
+          </div>
+          <div class="surge-timeline" id="surge-timeline" role="list" aria-label="Upcoming crowd surge predictions">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Zone Density Cards -->
+        <div class="card">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">density_medium</span>
+            <h2>Zone Density — Now</h2>
+          </div>
+          <div class="zone-grid" id="zone-grid" role="list" aria-label="Venue zone crowd densities">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Smart Recommendations -->
+        <div class="card recommendations-card">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">lightbulb</span>
+            <h2>Smart Recommendations</h2>
+          </div>
+          <ul class="recommendations-list" id="recommendations-list" aria-label="AI-generated venue recommendations" aria-live="polite">
+            <!-- Populated by JS -->
+          </ul>
+        </div>
+      </section>
+
+      <!-- ─────────────────────── MAP PANEL ─────────────────────── -->
+      <section id="panel-map" class="tab-panel" role="tabpanel" aria-labelledby="tab-map" hidden>
+        <div class="map-controls">
+          <div class="map-toggle-group" role="group" aria-label="Map layer controls">
+            <button class="map-toggle active" data-layer="current" aria-pressed="true">
+              <span class="material-icons-round" aria-hidden="true">people</span> Now
+            </button>
+            <button class="map-toggle" data-layer="predicted" aria-pressed="false">
+              <span class="material-icons-round" aria-hidden="true">update</span> In 10 min
+            </button>
+            <button class="map-toggle" data-layer="exits" aria-pressed="false">
+              <span class="material-icons-round" aria-hidden="true">exit_to_app</span> Exits
+            </button>
+          </div>
+          <div class="route-controls">
+            <label for="destination-select" class="sr-only">Route destination</label>
+            <select id="destination-select" aria-label="Select destination for routing">
+              <option value="">— Route to —</option>
+              <option value="concessions_n">Concessions North</option>
+              <option value="concessions_s">Concessions South</option>
+              <option value="restroom_upper">Restrooms Upper</option>
+              <option value="restroom_lower">Restrooms Lower</option>
+              <option value="first_aid">First Aid</option>
+              <option value="exit_main">Main Exit</option>
+              <option value="exit_east">East Exit</option>
+            </select>
+            <button id="get-route-btn" class="btn btn-primary btn-sm">
+              <span class="material-icons-round" aria-hidden="true">directions</span>
+              Route
+            </button>
+          </div>
+        </div>
+
+        <!-- Google Maps Container -->
+        <div id="venue-map" class="venue-map" role="img" aria-label="Interactive venue map with crowd density heatmap">
+          <!-- Google Maps mounts here -->
+          <div class="map-placeholder" id="map-placeholder" aria-hidden="true">
+            <div class="map-svg-container">
+              <!-- SVG Venue Layout (fallback + always-visible overlay) -->
+              <svg id="venue-svg" viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg"
+                aria-label="Venue floor plan" role="img">
+
+                <!-- Background -->
+                <rect width="600" height="500" fill="#1a1a2e" rx="12"/>
+
+                <!-- Playing field -->
+                <ellipse cx="300" cy="250" rx="160" ry="120" fill="#2d5a27" stroke="#4a8a43" stroke-width="2"/>
+                <ellipse cx="300" cy="250" rx="60" ry="45" fill="none" stroke="#4a8a43" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="300" y="255" text-anchor="middle" fill="#4a8a43" font-size="11" font-family="Inter">COURT</text>
+
+                <!-- Seating sections (zones) - will be coloured by JS -->
+                <!-- North -->
+                <path id="zone-north" d="M 180 80 L 420 80 L 460 130 L 140 130 Z" fill="#16213e" stroke="#0f3460" stroke-width="1.5" class="venue-zone" data-zone="north" tabindex="0" role="button" aria-label="North seating zone"/>
+                <text x="300" y="112" text-anchor="middle" fill="#a0aec0" font-size="10" font-family="Inter" pointer-events="none">NORTH STAND</text>
+
+                <!-- South -->
+                <path id="zone-south" d="M 140 370 L 460 370 L 420 420 L 180 420 Z" fill="#16213e" stroke="#0f3460" stroke-width="1.5" class="venue-zone" data-zone="south" tabindex="0" role="button" aria-label="South seating zone"/>
+                <text x="300" y="400" text-anchor="middle" fill="#a0aec0" font-size="10" font-family="Inter" pointer-events="none">SOUTH STAND</text>
+
+                <!-- East -->
+                <path id="zone-east" d="M 465 140 L 540 160 L 540 340 L 465 360 L 475 250 Z" fill="#16213e" stroke="#0f3460" stroke-width="1.5" class="venue-zone" data-zone="east" tabindex="0" role="button" aria-label="East seating zone"/>
+                <text x="505" y="255" text-anchor="middle" fill="#a0aec0" font-size="9" font-family="Inter" pointer-events="none">EAST</text>
+
+                <!-- West -->
+                <path id="zone-west" d="M 135 140 L 60 160 L 60 340 L 135 360 L 125 250 Z" fill="#16213e" stroke="#0f3460" stroke-width="1.5" class="venue-zone" data-zone="west" tabindex="0" role="button" aria-label="West seating zone"/>
+                <text x="97" y="255" text-anchor="middle" fill="#a0aec0" font-size="9" font-family="Inter" pointer-events="none">WEST</text>
+
+                <!-- Concourses -->
+                <rect id="zone-concourse-n" x="140" y="130" width="320" height="25" fill="#0f3460" stroke="#1a5276" stroke-width="1" class="venue-zone" data-zone="concourse_north" tabindex="0" role="button" aria-label="North concourse"/>
+                <text x="300" y="146" text-anchor="middle" fill="#7fb3d3" font-size="8" font-family="Inter" pointer-events="none">NORTH CONCOURSE</text>
+
+                <rect id="zone-concourse-s" x="140" y="345" width="320" height="25" fill="#0f3460" stroke="#1a5276" stroke-width="1" class="venue-zone" data-zone="concourse_south" tabindex="0" role="button" aria-label="South concourse"/>
+                <text x="300" y="361" text-anchor="middle" fill="#7fb3d3" font-size="8" font-family="Inter" pointer-events="none">SOUTH CONCOURSE</text>
+
+                <!-- Concession Stands -->
+                <rect x="170" y="142" width="40" height="20" rx="3" fill="#e67e22" class="venue-poi" data-poi="concessions_n" id="poi-concessions-n"/>
+                <text x="190" y="156" text-anchor="middle" fill="white" font-size="7" font-family="Inter" pointer-events="none">🍔 N</text>
+
+                <rect x="385" y="142" width="40" height="20" rx="3" fill="#e67e22" class="venue-poi" data-poi="concessions_ne" id="poi-concessions-ne"/>
+                <text x="405" y="156" text-anchor="middle" fill="white" font-size="7" font-family="Inter" pointer-events="none">🍺 NE</text>
+
+                <rect x="385" y="350" width="40" height="20" rx="3" fill="#e67e22" class="venue-poi" data-poi="concessions_s" id="poi-concessions-s"/>
+                <text x="405" y="364" text-anchor="middle" fill="white" font-size="7" font-family="Inter" pointer-events="none">🌮 S</text>
+
+                <!-- Restrooms -->
+                <rect x="220" y="142" width="28" height="20" rx="3" fill="#3498db" class="venue-poi" data-poi="restroom_upper"/>
+                <text x="234" y="156" text-anchor="middle" fill="white" font-size="7" font-family="Inter" pointer-events="none">🚻 A</text>
+
+                <rect x="350" y="350" width="28" height="20" rx="3" fill="#3498db" class="venue-poi" data-poi="restroom_lower"/>
+                <text x="364" y="364" text-anchor="middle" fill="white" font-size="7" font-family="Inter" pointer-events="none">🚻 B</text>
+
+                <!-- Exits -->
+                <rect x="260" y="420" width="80" height="22" rx="4" fill="#27ae60" class="venue-poi" data-poi="exit_main"/>
+                <text x="300" y="435" text-anchor="middle" fill="white" font-size="9" font-family="Inter" font-weight="600" pointer-events="none">EXIT MAIN</text>
+
+                <rect x="530" y="220" width="22" height="60" rx="4" fill="#27ae60" class="venue-poi" data-poi="exit_east"/>
+                <text x="541" y="253" text-anchor="middle" fill="white" font-size="8" font-family="Inter" font-weight="600" pointer-events="none" writing-mode="tb">EAST</text>
+
+                <rect x="48" y="220" width="22" height="60" rx="4" fill="#27ae60" class="venue-poi" data-poi="exit_west"/>
+                <text x="59" y="253" text-anchor="middle" fill="white" font-size="8" font-family="Inter" font-weight="600" pointer-events="none" writing-mode="tb">WEST</text>
+
+                <!-- Heatmap overlay circles (updated by JS) -->
+                <g id="heatmap-overlay" opacity="0.55">
+                  <!-- Dynamically populated -->
+                </g>
+
+                <!-- Route path (updated by JS) -->
+                <g id="route-path">
+                  <!-- Dynamically populated -->
+                </g>
+
+                <!-- User location pin -->
+                <g id="user-pin" transform="translate(300, 250)" aria-label="Your current location">
+                  <circle r="10" fill="#6c63ff" opacity="0.3" class="pulse-ring"/>
+                  <circle r="6" fill="#6c63ff"/>
+                  <circle r="2.5" fill="white"/>
+                </g>
+
+              </svg>
+            </div>
+
+            <!-- Map Legend -->
+            <div class="map-legend" aria-label="Map legend">
+              <div class="legend-title">Crowd Density</div>
+              <div class="legend-scale">
+                <div class="legend-item"><span class="legend-dot low" aria-hidden="true"></span><span>Low</span></div>
+                <div class="legend-item"><span class="legend-dot med" aria-hidden="true"></span><span>Medium</span></div>
+                <div class="legend-item"><span class="legend-dot high" aria-hidden="true"></span><span>High</span></div>
+                <div class="legend-item"><span class="legend-dot surge" aria-hidden="true"></span><span>Surge</span></div>
+              </div>
+              <div class="legend-poi">
+                <div class="legend-item"><span style="font-size:12px">🍔</span><span>Concessions</span></div>
+                <div class="legend-item"><span style="font-size:12px">🚻</span><span>Restrooms</span></div>
+                <div class="legend-item"><span style="font-size:12px">🟢</span><span>Exits</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Route Info Panel -->
+        <div id="route-info" class="route-info card" hidden aria-live="polite">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">directions_walk</span>
+            <h2 id="route-destination-label">Route</h2>
+          </div>
+          <div id="route-details"></div>
+        </div>
+      </section>
+
+      <!-- ─────────────────────── QUEUES PANEL ─────────────────────── -->
+      <section id="panel-queues" class="tab-panel" role="tabpanel" aria-labelledby="tab-queues" hidden>
+        <div class="card">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">timer</span>
+            <h2>Live Queue Times</h2>
+            <span class="badge badge-live" aria-label="Live data">LIVE</span>
+          </div>
+          <p class="card-subtitle">Powered by GameClock Intelligence — times update with game events</p>
+          <div class="queue-list" id="queue-list" role="list" aria-label="Queue wait times by location">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Best Time to Go -->
+        <div class="card best-time-card">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">schedule_send</span>
+            <h2>Best Time to Go</h2>
+          </div>
+          <div id="best-time-content" aria-live="polite">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Smart Windows -->
+        <div class="card">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">open_in_new</span>
+            <h2>Predicted Low-Traffic Windows</h2>
+          </div>
+          <div id="traffic-windows" aria-live="polite">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ─────────────────────── AI CHAT PANEL ─────────────────────── -->
+      <section id="panel-ai" class="tab-panel" role="tabpanel" aria-labelledby="tab-ai" hidden>
+        <div class="ai-chat-container">
+          <div class="ai-chat-header">
+            <div class="ai-avatar" aria-hidden="true">🤖</div>
+            <div>
+              <div class="ai-name">ArenaFlow AI</div>
+              <div class="ai-subtitle">Powered by Gemini 2.0 Flash</div>
+            </div>
+            <div class="ai-status-dot" aria-label="AI online" title="AI online"></div>
+          </div>
+
+          <!-- Chat Messages -->
+          <div
+            id="chat-messages"
+            class="chat-messages"
+            role="log"
+            aria-label="Chat conversation"
+            aria-live="polite"
+            aria-relevant="additions"
+          >
+            <!-- Welcome message -->
+            <div class="chat-message bot" role="listitem">
+              <div class="message-bubble">
+                <p>👋 Hi! I'm your ArenaFlow AI concierge. I know the current game state and crowd conditions.</p>
+                <p>Ask me things like:</p>
+                <ul>
+                  <li>"I have 8 minutes — can I grab food and be back in time?"</li>
+                  <li>"Which concession stand has the shortest line right now?"</li>
+                  <li>"Best way out after the game if I'm in the north stand?"</li>
+                  <li>"Is now a good time for a bathroom break?"</li>
+                </ul>
+              </div>
+              <div class="message-time">Just now</div>
+            </div>
+          </div>
+
+          <!-- Suggested Prompts -->
+          <div class="suggested-prompts" id="suggested-prompts" aria-label="Suggested questions">
+            <button class="prompt-chip" data-prompt="I have 8 minutes before the next quarter — can I get food and be back?">
+              ⏱️ 8 min food run?
+            </button>
+            <button class="prompt-chip" data-prompt="Which concession stand has the shortest wait right now?">
+              🍔 Shortest queue?
+            </button>
+            <button class="prompt-chip" data-prompt="What's the best exit route after the game ends?">
+              🚪 Post-game exit?
+            </button>
+            <button class="prompt-chip" data-prompt="Is this a good time for a bathroom break?">
+              🚻 Bathroom now?
+            </button>
+          </div>
+
+          <!-- Chat Input -->
+          <div class="chat-input-area">
+            <label for="chat-input" class="sr-only">Type your question</label>
+            <input
+              type="text"
+              id="chat-input"
+              class="chat-input"
+              placeholder="Ask about the venue, queues, routes..."
+              aria-label="Chat message input"
+              maxlength="500"
+              autocomplete="off"
+            />
+            <button id="chat-send-btn" class="btn btn-primary chat-send" aria-label="Send message">
+              <span class="material-icons-round" aria-hidden="true">send</span>
+            </button>
+          </div>
+
+          <!-- API Key Notice -->
+          <div class="api-key-notice" id="api-key-notice">
+            <span class="material-icons-round" aria-hidden="true" style="font-size:14px">info</span>
+            Add your Gemini API key in <code>js/config.js</code> to enable live AI responses.
+          </div>
+        </div>
+      </section>
+
+      <!-- ─────────────────────── SQUAD PANEL ─────────────────────── -->
+      <section id="panel-group" class="tab-panel" role="tabpanel" aria-labelledby="tab-group" hidden>
+        <div class="card">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">group_add</span>
+            <h2>Squad Sync</h2>
+          </div>
+          <p class="card-subtitle">Coordinate your group with AI-optimised meeting points</p>
+
+          <div class="squad-code-section">
+            <div class="squad-code-display" aria-label="Your squad code">
+              <span id="squad-code" aria-live="polite">AF-7429</span>
+            </div>
+            <p class="squad-code-hint">Share this code with your group</p>
+            <button id="copy-code-btn" class="btn btn-secondary" aria-label="Copy squad code to clipboard">
+              <span class="material-icons-round" aria-hidden="true">content_copy</span>
+              Copy Code
+            </button>
+            <button id="new-code-btn" class="btn btn-ghost" aria-label="Generate new squad code">
+              <span class="material-icons-round" aria-hidden="true">refresh</span>
+              New Code
+            </button>
+          </div>
+        </div>
+
+        <!-- Meeting Point Suggestions -->
+        <div class="card">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">location_on</span>
+            <h2>AI Meeting Point Suggestions</h2>
+          </div>
+          <div id="meeting-points" aria-live="polite">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Group Members -->
+        <div class="card">
+          <div class="card-header">
+            <span class="material-icons-round card-icon" aria-hidden="true">people</span>
+            <h2>Group Members</h2>
+          </div>
+          <div class="add-member-form">
+            <label for="member-name" class="sr-only">Member name</label>
+            <input type="text" id="member-name" placeholder="Member name" aria-label="Add group member name" maxlength="30" />
+            <label for="member-section" class="sr-only">Seating section</label>
+            <select id="member-section" aria-label="Member seating section">
+              <option value="">Section</option>
+              <option value="north">North Stand</option>
+              <option value="south">South Stand</option>
+              <option value="east">East Stand</option>
+              <option value="west">West Stand</option>
+            </select>
+            <button id="add-member-btn" class="btn btn-primary btn-sm" aria-label="Add member to group">
+              <span class="material-icons-round" aria-hidden="true">add</span>
+            </button>
+          </div>
+          <ul id="members-list" class="members-list" aria-label="Group members list" aria-live="polite">
+            <!-- Populated by JS -->
+          </ul>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" hidden aria-label="Loading" role="status">
+      <div class="spinner" aria-hidden="true"></div>
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Config (user must fill in their API keys) -->
+  <script src="js/config.js"></script>
+
+  <!-- App Modules -->
+  <script type="module" src="js/crowd-engine.js"></script>
+  <script type="module" src="js/gemini-service.js"></script>
+  <script type="module" src="js/venue-map.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
